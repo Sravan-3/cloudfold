@@ -1,0 +1,1 @@
+CREATE INDEX idx_uploads_status_created ON uploads(status, created_at);

@@ -41,7 +41,6 @@ logs/
 Cargo.lock
 **/*.rs.bk
 
-*.sql
 *.dump
 *.backup
 *.bak
