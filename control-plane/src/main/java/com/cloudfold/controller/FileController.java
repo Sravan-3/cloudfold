@@ -21,6 +21,6 @@ public class FileController {
 
     @PostMapping("/init-upload")
     public InitUploadResponse initUpload(@RequestBody InitUploadRequest request){
-        return service.intiUpload(request);
+        return service.initUpload(request);
     }
 }

@@ -32,8 +32,8 @@ public class UploadSessionService {
         Map<String, Object> sessionData = Map.of(
                 "fileId", upload.getFileId().toString(),
                 "status",  upload.getStatus().name(),
-                "totalChunks", String.valueOf(upload.getTotalChunks()),
-                "completedChunks", String.valueOf(upload.getCompletedChunks())
+                "totalChunks", upload.getTotalChunks(),
+                "completedChunks", upload.getCompletedChunks()
         );
 
         redisTemplate.opsForHash().putAll(key, sessionData);
@@ -46,16 +46,14 @@ public class UploadSessionService {
 
         Map<Object, Object> cached = redisTemplate.opsForHash().entries(key);
 
-        if(!cached.isEmpty()){
-
+        if(cached.containsKey("fileId")){
             // Cache HIT
-
             Upload upload = new Upload();
             upload.setUploadId(uploadId);
             upload.setFileId(UUID.fromString((String) cached.get("fileId")));
             upload.setStatus(UploadStatus.valueOf((String) cached.get("status")));
-            upload.setTotalChunks(Integer.parseInt((String) cached.get("totalChunks")));
-            upload.setCompletedChunks(Integer.parseInt((String) cached.get("completedChunks")));
+            upload.setTotalChunks(((Number) cached.get("totalChunks")).intValue());
+            upload.setCompletedChunks(((Number) cached.get("completedChunks")).intValue());
 
             return upload;
         }

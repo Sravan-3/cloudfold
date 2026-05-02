@@ -8,6 +8,7 @@ import com.cloudfold.model.Upload;
 import com.cloudfold.model.UploadStatus;
 import com.cloudfold.repository.FileMetadataRepository;
 import com.cloudfold.repository.UploadRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +31,8 @@ public class FileService {
         this.uploadSessionService = uploadSessionService;
     }
 
-    public InitUploadResponse intiUpload(InitUploadRequest request){
+    @Transactional
+    public InitUploadResponse initUpload(InitUploadRequest request){
 
         /* This functions checks if the filename exits */
         if(request.getFilename() == null || request.getFilename().isBlank()) {
