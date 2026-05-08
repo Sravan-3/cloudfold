@@ -1,5 +1,6 @@
 package com.cloudfold.service;
 
+import com.cloudfold.dto.ChunkDescriptor;
 import com.cloudfold.dto.InitUploadRequest;
 import com.cloudfold.dto.InitUploadResponse;
 import com.cloudfold.model.FileMetadata;
@@ -21,14 +22,16 @@ public class FileService {
     private final FileMetadataRepository repo;
     private final UploadRepository uploadRepo;
     private final UploadSessionService uploadSessionService;
+    private final ChunkingService chunkingService;
 
     @Value("${app.chunk-size-bytes:5242880}")
     private long chunkSize;
 
-    public FileService(FileMetadataRepository repo, UploadRepository uploadRepo, UploadSessionService uploadSessionService) {
+    public FileService(FileMetadataRepository repo, UploadRepository uploadRepo, UploadSessionService uploadSessionService, ChunkingService chunkingService) {
         this.repo = repo;
         this.uploadRepo = uploadRepo;
         this.uploadSessionService = uploadSessionService;
+        this.chunkingService = chunkingService;
     }
 
     @Transactional
@@ -56,37 +59,18 @@ public class FileService {
 
         file = repo.save(file);
 
-        /*
-            Below function Creates Chunk Plan
-            If file size = 15MB, chunk size = 5MB
-            Generated chunks: [0, 5MB, 10MB]
-            Each value represents: Start uploading from this byte offset
-         */
-        List<Long> chunks = new ArrayList<>();
-
-        long size = request.getSize();
-        long offset = 0;
-
-        while (offset < size) {
-            chunks.add(offset);
-            offset += chunkSize;
-        }
-
-        /*
-            Calculate the total number of chucks
-        */
-        int totalChunks = (int) Math.ceil((double) request.getSize() / chunkSize);
+        List<ChunkDescriptor> chunkPlan = chunkingService.plan(request.getSize());
 
         Upload upload = new Upload();
         upload.setFileId(file.getId());
         upload.setStatus(UploadStatus.PENDING);
-        upload.setTotalChunks(totalChunks);
+        upload.setTotalChunks(chunkPlan.size());
         upload.setCompletedChunks(0);
 
         upload = uploadRepo.save(upload);
         uploadSessionService.cacheUploadSession(upload);
 
-        return new InitUploadResponse(upload.getUploadId(), chunks);
+        return new InitUploadResponse(upload.getUploadId(), chunkPlan);
     }
 
 }

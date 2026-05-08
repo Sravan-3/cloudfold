@@ -6,9 +6,9 @@ import java.util.UUID;
 public class InitUploadResponse {
 
     private UUID uploadId;
-    private List<Long> chunks;
+    private List<ChunkDescriptor> chunks;
 
-    public InitUploadResponse(UUID uploadId, List<Long> chunks) {
+    public InitUploadResponse(UUID uploadId, List<ChunkDescriptor> chunks) {
         this.uploadId = uploadId;
         this.chunks = chunks;
     }
@@ -16,8 +16,7 @@ public class InitUploadResponse {
     public UUID getUploadId() {
         return uploadId;
     }
-
-    public List<Long> getChunks() {
+    public List<ChunkDescriptor> getChunks() {
         return chunks;
     }
 }
