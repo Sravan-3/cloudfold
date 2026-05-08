@@ -73,3 +73,7 @@ coverage/
 *.war
 *.ear
 *.class
+
+# Storage node runtime data
+storage-node/data/
+storage-node/data/chunks/
