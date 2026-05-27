@@ -4,6 +4,16 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+.env
+.env.*
+*.env
+*.key
+*.pem
+*.crt
+*.p12
+secrets/
+config/secrets.yml
+
 ### STS ###
 .apt_generated
 .classpath

@@ -1,0 +1,25 @@
+# Rust build output
+/target
+
+# Cargo lock
+# Keep Cargo.lock for applications
+# Ignore for libraries if desired
+# Cargo.lock
+
+# Environment variables / secrets
+.env
+
+# VS Code
+.vscode/
+
+# IntelliJ
+.idea/
+
+# macOS
+.DS_Store
+
+# Linux temporary files
+*~
+
+# Logs
+*.log
