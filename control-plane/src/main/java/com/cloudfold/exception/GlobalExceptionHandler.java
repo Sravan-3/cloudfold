@@ -16,4 +16,14 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("error", ex.getMessage()));
     }
+
+    @ExceptionHandler(UploadIncompleteException.class)
+    public ResponseEntity<Map<String, Object>> handleIncomplete(UploadIncompleteException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "error", ex.getMessage(),
+                        "missingChunks", ex.getMissingChunks()
+                ));
+    }
 }

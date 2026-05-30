@@ -7,7 +7,6 @@ mod validation;
 use actix_web::{web, App, HttpServer};
 use dotenvy::dotenv;
 use tokio::fs;
-use std::env;
 
 const CHUNKS_DIR: &str = "./data/chunks";
 
