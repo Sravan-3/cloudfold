@@ -17,13 +17,16 @@ public class ChunkCompletionService {
     private final ChunkCompletionRepository completionRepo;
     private final UploadRepository uploadRepo;
     private final UploadSessionService uploadSessionService;
+    private final ReplicationService replicationService;
 
     public ChunkCompletionService(ChunkCompletionRepository completionRepo,
                                   UploadRepository uploadRepo,
-                                  UploadSessionService uploadSessionService) {
+                                  UploadSessionService uploadSessionService,
+                                  ReplicationService replicationService) {
         this.completionRepo = completionRepo;
         this.uploadRepo = uploadRepo;
         this.uploadSessionService = uploadSessionService;
+        this.replicationService = replicationService;
     }
 
     @Transactional
@@ -73,6 +76,7 @@ public class ChunkCompletionService {
         completion.setChunkNumber(chunkNumber);
         completion.setChunkHash(request.getChunkHash());
         completionRepo.save(completion);
+        replicationService.recordChunkOnNode(request.getChunkHash(), "node-1");
 
         /*
         As mentioned above, we treat the database as the source of truth.
