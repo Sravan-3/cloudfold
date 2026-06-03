@@ -1,5 +1,7 @@
 package com.cloudfold.controller;
 
+import com.cloudfold.client.StorageNodeClient;
+import com.cloudfold.config.HttpClientConfig;
 import com.cloudfold.dto.*;
 import com.cloudfold.security.HmacSigner;
 import com.cloudfold.service.ChunkCompletionService;
@@ -20,6 +22,7 @@ public class FileController {
     private final HmacSigner hmacSigner;
     private final ChunkCompletionService chunkCompletionService;
     private final UploadCompletionService uploadCompletionService;
+    private final StorageNodeClient storageNodeClient;
 
     @Value("${app.storage.node.url}")
     private String storageNodeUrl;
@@ -27,11 +30,13 @@ public class FileController {
     public FileController(FileService service,
                           HmacSigner hmacSigner,
                           ChunkCompletionService chunkCompletionService,
-                          UploadCompletionService uploadCompletionService){
+                          UploadCompletionService uploadCompletionService,
+                          StorageNodeClient storageNodeClient){
         this.service = service;
         this.hmacSigner = hmacSigner;
         this.chunkCompletionService = chunkCompletionService;
         this.uploadCompletionService = uploadCompletionService;
+        this.storageNodeClient = storageNodeClient;
     }
 
     @GetMapping("/upload-url")
@@ -63,5 +68,20 @@ public class FileController {
     @PostMapping("/{uploadId}/complete")
     public UploadCompleteResponse completeUpload(@PathVariable UUID uploadId) {
         return uploadCompletionService.completeUpload(uploadId);
+    }
+
+    @GetMapping("/chunks/{chunkHash}/verify")
+    public Map<String, Object> verifyChunk(@PathVariable String chunkHash) {
+
+        if (chunkHash.length() != 64) {
+            throw new IllegalArgumentException("Invalid chunk hash");
+        }
+
+        boolean exists = storageNodeClient.verifyChunk(chunkHash);
+        return Map.of(
+                "chunkHash", chunkHash,
+                "exists", exists,
+                "storageNode", storageNodeUrl
+        );
     }
 }

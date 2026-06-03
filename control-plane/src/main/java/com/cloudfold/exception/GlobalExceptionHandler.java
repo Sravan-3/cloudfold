@@ -26,4 +26,12 @@ public class GlobalExceptionHandler {
                         "missingChunks", ex.getMissingChunks()
                 ));
     }
+
+    @ExceptionHandler(StorageNodeUnavailableException.class)
+    public ResponseEntity<Map<String, String>> handleNodeUnavailable(
+            StorageNodeUnavailableException ex) {
+        return ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(Map.of("error", ex.getMessage()));
+    }
 }
