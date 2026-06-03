@@ -1,0 +1,76 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cloudfold-net
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - cloudfold-net
+
+  storage-node:
+    build:
+      context: ./storage-node
+      dockerfile: Dockerfile
+    ports:
+      - "9001:9001"
+    volumes:
+      - chunks_data:/app/data/chunks
+    environment:
+      PRESIGN_SECRET: ${PRESIGN_SECRET}
+    networks:
+      - cloudfold-net
+
+  control-plane:
+    build:
+      context: ./control-plane
+      dockerfile: Dockerfile
+    ports:
+      - "9090:9090"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      APP_STORAGE_NODE_URL: http://storage-node:9001
+      APP_PRESIGN_SECRET: ${PRESIGN_SECRET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      storage-node:
+        condition: service_started
+    networks:
+      - cloudfold-net
+
+volumes:
+  postgres_data:
+  chunks_data:
+
+networks:
+  cloudfold-net:
+    driver: bridge

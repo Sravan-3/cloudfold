@@ -6,6 +6,8 @@ Thumbs.db
 *.swo
 *.bak
 
+control-plane/target/
+
 .env
 .env.*
 *.env
